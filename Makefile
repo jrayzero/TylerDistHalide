@@ -42,16 +42,16 @@ LLVM_CXX_FLAGS += -DLLVM_VERSION=$(LLVM_VERSION_TIMES_10)
 # edit this file, add "WITH_FOO=" (no assigned value) to the make
 # line, or define an environment variable WITH_FOO that has an empty
 # value.
-WITH_NATIVE_CLIENT ?= $(findstring nacltransforms, $(LLVM_COMPONENTS))
+WITH_NATIVE_CLIENT = 
 WITH_X86 ?= $(findstring x86, $(LLVM_COMPONENTS))
-WITH_ARM ?= $(findstring arm, $(LLVM_COMPONENTS))
-WITH_MIPS ?= $(findstring mips, $(LLVM_COMPONENTS))
-WITH_AARCH64 ?= $(findstring aarch64, $(LLVM_COMPONENTS))
-WITH_PTX ?= $(findstring nvptx, $(LLVM_COMPONENTS))
-WITH_OPENCL ?= not-empty
-WITH_METAL ?= not-empty
-WITH_OPENGL ?= not-empty
-WITH_MPI ?=
+WITH_ARM = 
+WITH_MIPS = 
+WITH_AARCH64 = 
+WITH_PTX = 
+WITH_OPENCL = 
+WITH_METAL = 
+WITH_OPENGL = 
+WITH_MPI ?= not-empty
 WITH_RENDERSCRIPT ?= not-empty
 WITH_INTROSPECTION ?= not-empty
 WITH_EXCEPTIONS ?=
@@ -84,9 +84,9 @@ METAL_LLVM_CONFIG_LIB=$(if $(WITH_METAL), , )
 
 OPENGL_CXX_FLAGS=$(if $(WITH_OPENGL), -DWITH_OPENGL=1, )
 
-CXX := $(if $(WITH_MPI), mpicxx, $(CXX))
+CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
 MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1, )
-MPI_RUN=$(if $(MPI_NODES), srun -N$(MPI_NODES) --exclude=lanka11, )
+MPI_RUN=$($(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp/ -np $(NUM_MPI_RANKS) -host $(MPI_NODES) --map-by node --mca btl_openib_allow_ib 1)
 
 RENDERSCRIPT_CXX_FLAGS=$(if $(WITH_RENDERSCRIPT), -DWITH_RENDERSCRIPT=1, )
 
@@ -233,18 +233,9 @@ SOURCE_FILES = \
   Bounds.cpp \
   BoundsInference.cpp \
   Buffer.cpp \
-  CodeGen_ARM.cpp \
   CodeGen_C.cpp \
-  CodeGen_GPU_Dev.cpp \
-  CodeGen_GPU_Host.cpp \
   CodeGen_Internal.cpp \
   CodeGen_LLVM.cpp \
-  CodeGen_MIPS.cpp \
-  CodeGen_OpenCL_Dev.cpp \
-  CodeGen_Metal_Dev.cpp \
-  CodeGen_OpenGL_Dev.cpp \
-  CodeGen_OpenGLCompute_Dev.cpp \
-  CodeGen_PNaCl.cpp \
   CodeGen_Posix.cpp \
   CodeGen_PTX_Dev.cpp \
   CodeGen_Renderscript_Dev.cpp \
@@ -1104,7 +1095,7 @@ $(BUILD_DIR)/clang_ok:
 	@exit 1
 endif
 
-ifneq (,$(findstring $(LLVM_VERSION_TIMES_10), 35 36 37 38))
+ifneq (,$(findstring $(LLVM_VERSION_TIMES_10), 35 36 37 38 50))
 LLVM_OK=yes
 endif
 

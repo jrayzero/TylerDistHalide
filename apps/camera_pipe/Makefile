@@ -1,12 +1,8 @@
 include ../support/Makefile.inc
 
 WITH_MPI ?=
-CXX := $(if $(WITH_MPI), mpicxx, $(CXX))
+CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
 MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1, )
-
-MPIP_LINK_FLAGS := -L/data/scratch/tyler/install/lib -L/data/scratch/tyler/sw/mpiP-3.4.1/lib -lmpiP -lbfd -lm -lunwind
-MPI_COMPILE_FLAGS := -I/usr/local/include
-MPI_LINK_FLAGS := -L/usr/local/lib -lmpichf90 -Wl,-rpath -Wl,/usr/local/lib -lmpich -lpmi -lopa -lmpl
 
 ifeq ($(HL_TARGET),ptx)
   SCHEDULE=100
@@ -42,10 +38,7 @@ camera_pipe.avi: camera_pipe.cpp viz.sh $(HALIDE_TRACE_VIZ) ../../bin/HalideTrac
 	bash viz.sh
 
 distributed_camera_pipe: camera_pipe_distributed.cpp
-	$(CXX) $(MPI_CXX_FLAGS) $(CXXFLAGS) -O3 camera_pipe_distributed.cpp $(LIB_HALIDE) -o distributed_camera_pipe -ldl -lpthread -lz $(LDFLAGS)
-
-distributed_camera_pipe_mpip: camera_pipe_distributed.cpp
-	g++ $(MPI_CXX_FLAGS) $(CXXFLAGS) -O3 camera_pipe_distributed.cpp $(LIB_HALIDE) -o distributed_camera_pipe_mpip -ldl -lpthread -lz $(LDFLAGS) $(MPIP_LINK_FLAGS) $(MPI_COMPILE_FLAGS) $(MPI_LINK_FLAGS) -DUSE_MPIP=1
+	$(CXX) $(CXXFLAGS) $(MPI_CXX_FLAGS) -O3 camera_pipe_distributed.cpp $(LIB_HALIDE) -o distributed_camera_pipe -ldl -lpthread -lz $(LDFLAGS)
 
 clean:
 	rm -f out.png process curved.o camera_pipe fcam/*.o distributed_camera_pipe

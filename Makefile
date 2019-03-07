@@ -12,17 +12,17 @@
 SHELL = bash
 CXX ?= g++
 PREFIX ?= /usr/local
-LLVM_CONFIG ?= llvm-config
-LLVM_COMPONENTS= $(shell $(LLVM_CONFIG) --components)
-LLVM_VERSION = $(shell $(LLVM_CONFIG) --version | cut -b 1-3)
-LLVM_FULL_VERSION = $(shell $(LLVM_CONFIG) --version)
-CLANG ?= clang
-CLANG_VERSION = $(shell $(CLANG) --version)
-LLVM_BINDIR = $(shell $(LLVM_CONFIG) --bindir)
-LLVM_LIBDIR = $(shell $(LLVM_CONFIG) --libdir)
+LLVM_CONFIG_DISTHALIDE ?= llvm-config
+LLVM_COMPONENTS= $(shell $(LLVM_CONFIG_DISTHALIDE) --components)
+LLVM_VERSION = $(shell $(LLVM_CONFIG_DISTHALIDE) --version | cut -b 1-3)
+LLVM_FULL_VERSION = $(shell $(LLVM_CONFIG_DISTHALIDE) --version)
+CLANG_DISTHALIDE ?= clang
+CLANG_VERSION = $(shell $(CLANG_DISTHALIDE) --version)
+LLVM_BINDIR = $(shell $(LLVM_CONFIG_DISTHALIDE) --bindir)
+LLVM_LIBDIR = $(shell $(LLVM_CONFIG_DISTHALIDE) --libdir)
 LLVM_AS = $(LLVM_BINDIR)/llvm-as
 LLVM_NM = $(LLVM_BINDIR)/llvm-nm
-LLVM_CXX_FLAGS = -std=c++11  $(filter-out -O% -g -fomit-frame-pointer -pedantic -W% -W, $(shell $(LLVM_CONFIG) --cxxflags))
+LLVM_CXX_FLAGS = -std=c++11  $(filter-out -O% -g -fomit-frame-pointer -pedantic -W% -W, $(shell $(LLVM_CONFIG_DISTHALIDE) --cxxflags))
 OPTIMIZE ?= -O3
 # This can be set to -m32 to get a 32-bit build of Halide on a 64-bit system.
 # (Normally this can be done via pointing to a compiler that defaults to 32-bits,
@@ -34,7 +34,7 @@ TEST_CXX_FLAGS ?= -std=c++11 $(BUILD_BIT_SIZE) -g -fno-omit-frame-pointer -fno-r
 TUTORIAL_CXX_FLAGS ?= -std=c++11 $(BUILD_BIT_SIZE) -g -fno-omit-frame-pointer -fno-rtti
 GENGEN_DEPS ?= $(BIN_DIR)/libHalide.so $(INCLUDE_DIR)/Halide.h $(ROOT_DIR)/tools/GenGen.cpp
 
-LLVM_VERSION_TIMES_10 = $(shell $(LLVM_CONFIG) --version | cut -b 1,3)
+LLVM_VERSION_TIMES_10 = $(shell $(LLVM_CONFIG_DISTHALIDE) --version | cut -b 1,3)
 LLVM_CXX_FLAGS += -DLLVM_VERSION=$(LLVM_VERSION_TIMES_10)
 
 # All WITH_* flags are either empty or not-empty. They do not behave
@@ -42,15 +42,15 @@ LLVM_CXX_FLAGS += -DLLVM_VERSION=$(LLVM_VERSION_TIMES_10)
 # edit this file, add "WITH_FOO=" (no assigned value) to the make
 # line, or define an environment variable WITH_FOO that has an empty
 # value.
-WITH_NATIVE_CLIENT = 
+WITH_NATIVE_CLIENT ?= $(findstring nacltransforms, $(LLVM_COMPONENTS))
 WITH_X86 ?= $(findstring x86, $(LLVM_COMPONENTS))
-WITH_ARM = 
-WITH_MIPS = 
-WITH_AARCH64 = 
-WITH_PTX = 
-WITH_OPENCL = 
-WITH_METAL = 
-WITH_OPENGL = 
+WITH_ARM ?= $(findstring arm, $(LLVM_COMPONENTS))
+WITH_MIPS ?= $(findstring mips, $(LLVM_COMPONENTS))
+WITH_AARCH64 ?= $(findstring aarch64, $(LLVM_COMPONENTS))
+WITH_PTX ?= $(findstring nvptx, $(LLVM_COMPONENTS))
+WITH_OPENCL = not-empty
+WITH_METAL = not-empty
+WITH_OPENGL = not-empty
 WITH_MPI ?= not-empty
 WITH_RENDERSCRIPT ?= not-empty
 WITH_INTROSPECTION ?= not-empty
@@ -61,26 +61,26 @@ HL_TARGET ?= host
 HL_JIT_TARGET ?= host
 
 NATIVE_CLIENT_CXX_FLAGS = $(if $(WITH_NATIVE_CLIENT), -DWITH_NATIVE_CLIENT=1, )
-NATIVE_CLIENT_LLVM_CONFIG_LIB = $(if $(WITH_NATIVE_CLIENT), nacltransforms, )
+NATIVE_CLIENT_LLVM_CONFIG_DISTHALIDE_LIB = $(if $(WITH_NATIVE_CLIENT), nacltransforms, )
 
 X86_CXX_FLAGS=$(if $(WITH_X86), -DWITH_X86=1, )
-X86_LLVM_CONFIG_LIB=$(if $(WITH_X86), x86, )
+X86_LLVM_CONFIG_DISTHALIDE_LIB=$(if $(WITH_X86), x86, )
 
 ARM_CXX_FLAGS=$(if $(WITH_ARM), -DWITH_ARM=1, )
-ARM_LLVM_CONFIG_LIB=$(if $(WITH_ARM), arm, )
+ARM_LLVM_CONFIG_DISTHALIDE_LIB=$(if $(WITH_ARM), arm, )
 
 MIPS_CXX_FLAGS=$(if $(WITH_MIPS), -DWITH_MIPS=1, )
-MIPS_LLVM_CONFIG_LIB=$(if $(WITH_MIPS), mips, )
+MIPS_LLVM_CONFIG_DISTHALIDE_LIB=$(if $(WITH_MIPS), mips, )
 
 PTX_CXX_FLAGS=$(if $(WITH_PTX), -DWITH_PTX=1, )
-PTX_LLVM_CONFIG_LIB=$(if $(WITH_PTX), nvptx, )
+PTX_LLVM_CONFIG_DISTHALIDE_LIB=$(if $(WITH_PTX), nvptx, )
 PTX_DEVICE_INITIAL_MODULES=$(if $(WITH_PTX), libdevice.compute_20.10.bc libdevice.compute_30.10.bc libdevice.compute_35.10.bc, )
 
 OPENCL_CXX_FLAGS=$(if $(WITH_OPENCL), -DWITH_OPENCL=1, )
-OPENCL_LLVM_CONFIG_LIB=$(if $(WITH_OPENCL), , )
+OPENCL_LLVM_CONFIG_DISTHALIDE_LIB=$(if $(WITH_OPENCL), , )
 
 METAL_CXX_FLAGS=$(if $(WITH_METAL), -DWITH_METAL=1, )
-METAL_LLVM_CONFIG_LIB=$(if $(WITH_METAL), , )
+METAL_LLVM_CONFIG_DISTHALIDE_LIB=$(if $(WITH_METAL), , )
 
 OPENGL_CXX_FLAGS=$(if $(WITH_OPENGL), -DWITH_OPENGL=1, )
 
@@ -91,7 +91,7 @@ MPI_RUN=$($(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp
 RENDERSCRIPT_CXX_FLAGS=$(if $(WITH_RENDERSCRIPT), -DWITH_RENDERSCRIPT=1, )
 
 AARCH64_CXX_FLAGS=$(if $(WITH_AARCH64), -DWITH_AARCH64=1, )
-AARCH64_LLVM_CONFIG_LIB=$(if $(WITH_AARCH64), aarch64, )
+AARCH64_LLVM_CONFIG_DISTHALIDE_LIB=$(if $(WITH_AARCH64), aarch64, )
 
 INTROSPECTION_CXX_FLAGS=$(if $(WITH_INTROSPECTION), -DWITH_INTROSPECTION, )
 EXCEPTIONS_CXX_FLAGS=$(if $(WITH_EXCEPTIONS), -DWITH_EXCEPTIONS, )
@@ -121,14 +121,14 @@ print-%:
 	@echo '$*=$($*)'
 
 ifeq ($(USE_LLVM_SHARED_LIB), )
-LLVM_STATIC_LIBS = -L $(LLVM_LIBDIR) $(shell $(LLVM_CONFIG) --libs bitwriter bitreader linker ipo mcjit $(LLVM_OLD_JIT_COMPONENT) $(X86_LLVM_CONFIG_LIB) $(ARM_LLVM_CONFIG_LIB) $(OPENCL_LLVM_CONFIG_LIB) $(METAL_LLVM_CONFIG_LIB) $(NATIVE_CLIENT_LLVM_CONFIG_LIB) $(PTX_LLVM_CONFIG_LIB) $(AARCH64_LLVM_CONFIG_LIB) $(MIPS_LLVM_CONFIG_LIB))
+LLVM_STATIC_LIBS = -L $(LLVM_LIBDIR) $(shell $(LLVM_CONFIG_DISTHALIDE) --libs bitwriter bitreader linker ipo mcjit $(LLVM_OLD_JIT_COMPONENT) $(X86_LLVM_CONFIG_DISTHALIDE_LIB) $(ARM_LLVM_CONFIG_DISTHALIDE_LIB) $(OPENCL_LLVM_CONFIG_DISTHALIDE_LIB) $(METAL_LLVM_CONFIG_DISTHALIDE_LIB) $(NATIVE_CLIENT_LLVM_CONFIG_DISTHALIDE_LIB) $(PTX_LLVM_CONFIG_DISTHALIDE_LIB) $(AARCH64_LLVM_CONFIG_DISTHALIDE_LIB) $(MIPS_LLVM_CONFIG_DISTHALIDE_LIB))
 LLVM_SHARED_LIBS =
 else
 LLVM_STATIC_LIBS =
 LLVM_SHARED_LIBS = -L $(LLVM_LIBDIR) -lLLVM-$(LLVM_FULL_VERSION)
 endif
 
-LLVM_LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags --system-libs)
+LLVM_LDFLAGS = $(shell $(LLVM_CONFIG_DISTHALIDE) --ldflags --system-libs)
 
 UNAME = $(shell uname)
 
@@ -233,9 +233,18 @@ SOURCE_FILES = \
   Bounds.cpp \
   BoundsInference.cpp \
   Buffer.cpp \
+  CodeGen_ARM.cpp \
   CodeGen_C.cpp \
+  CodeGen_GPU_Dev.cpp \
+  CodeGen_GPU_Host.cpp \
   CodeGen_Internal.cpp \
   CodeGen_LLVM.cpp \
+  CodeGen_MIPS.cpp \
+  CodeGen_OpenCL_Dev.cpp \
+  CodeGen_Metal_Dev.cpp \
+  CodeGen_OpenGL_Dev.cpp \
+  CodeGen_OpenGLCompute_Dev.cpp \
+  CodeGen_PNaCl.cpp \
   CodeGen_Posix.cpp \
   CodeGen_PTX_Dev.cpp \
   CodeGen_Renderscript_Dev.cpp \
@@ -594,27 +603,27 @@ RUNTIME_TRIPLE_WIN_32 = "i386-unknown-unknown-unknown"
 # -m64 isn't respected unless we also use a 64-bit target
 $(BUILD_DIR)/initmod.%_64.ll: $(SRC_DIR)/runtime/%.cpp $(BUILD_DIR)/clang_ok
 	@-mkdir -p $(BUILD_DIR)
-	$(CLANG) $(CXX_WARNING_FLAGS) -O3 -ffreestanding -fno-blocks -fno-exceptions -fno-unwind-tables -m64 -target $(RUNTIME_TRIPLE_64) -DCOMPILING_HALIDE_RUNTIME -DBITS_64 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_64.d
+	$(CLANG_DISTHALIDE) $(CXX_WARNING_FLAGS) -O3 -ffreestanding -fno-blocks -fno-exceptions -fno-unwind-tables -m64 -target $(RUNTIME_TRIPLE_64) -DCOMPILING_HALIDE_RUNTIME -DBITS_64 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_64.d
 
 $(BUILD_DIR)/initmod.windows_%_32.ll: $(SRC_DIR)/runtime/windows_%.cpp $(BUILD_DIR)/clang_ok
 	@-mkdir -p $(BUILD_DIR)
-	$(CLANG) $(CXX_WARNING_FLAGS) -O3 -ffreestanding -fno-blocks -fno-exceptions -fno-unwind-tables -m32 -target $(RUNTIME_TRIPLE_WIN_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/windows_$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.windows_$*_32.d
+	$(CLANG_DISTHALIDE) $(CXX_WARNING_FLAGS) -O3 -ffreestanding -fno-blocks -fno-exceptions -fno-unwind-tables -m32 -target $(RUNTIME_TRIPLE_WIN_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/windows_$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.windows_$*_32.d
 
 $(BUILD_DIR)/initmod.%_32.ll: $(SRC_DIR)/runtime/%.cpp $(BUILD_DIR)/clang_ok
 	@-mkdir -p $(BUILD_DIR)
-	$(CLANG) $(CXX_WARNING_FLAGS) -O3 -ffreestanding -fno-blocks -fno-exceptions -fno-unwind-tables -m32 -target $(RUNTIME_TRIPLE_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_32.d
+	$(CLANG_DISTHALIDE) $(CXX_WARNING_FLAGS) -O3 -ffreestanding -fno-blocks -fno-exceptions -fno-unwind-tables -m32 -target $(RUNTIME_TRIPLE_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_32.d
 
 $(BUILD_DIR)/initmod.%_64_debug.ll: $(SRC_DIR)/runtime/%.cpp $(BUILD_DIR)/clang_ok
 	@-mkdir -p $(BUILD_DIR)
-	$(CLANG) $(CXX_WARNING_FLAGS) -g -DDEBUG_RUNTIME -O3 -ffreestanding -fno-blocks -fno-exceptions -m64 -target  $(RUNTIME_TRIPLE_64) -DCOMPILING_HALIDE_RUNTIME -DBITS_64 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_64_debug.d
+	$(CLANG_DISTHALIDE) $(CXX_WARNING_FLAGS) -g -DDEBUG_RUNTIME -O3 -ffreestanding -fno-blocks -fno-exceptions -m64 -target  $(RUNTIME_TRIPLE_64) -DCOMPILING_HALIDE_RUNTIME -DBITS_64 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_64_debug.d
 
 $(BUILD_DIR)/initmod.windows_%_32_debug.ll: $(SRC_DIR)/runtime/windows_%.cpp $(BUILD_DIR)/clang_ok
 	@-mkdir -p $(BUILD_DIR)
-	$(CLANG) $(CXX_WARNING_FLAGS) -g -DDEBUG_RUNTIME -O3 -ffreestanding -fno-blocks -fno-exceptions -m32 -target $(RUNTIME_TRIPLE_WIN_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/windows_$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.windows_$*_32_debug.d
+	$(CLANG_DISTHALIDE) $(CXX_WARNING_FLAGS) -g -DDEBUG_RUNTIME -O3 -ffreestanding -fno-blocks -fno-exceptions -m32 -target $(RUNTIME_TRIPLE_WIN_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/windows_$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.windows_$*_32_debug.d
 
 $(BUILD_DIR)/initmod.%_32_debug.ll: $(SRC_DIR)/runtime/%.cpp $(BUILD_DIR)/clang_ok
 	@-mkdir -p $(BUILD_DIR)
-	$(CLANG) $(CXX_WARNING_FLAGS) -g -DDEBUG_RUNTIME -O3 -ffreestanding -fno-blocks -fno-exceptions -m32 -target $(RUNTIME_TRIPLE_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_32_debug.d
+	$(CLANG_DISTHALIDE) $(CXX_WARNING_FLAGS) -g -DDEBUG_RUNTIME -O3 -ffreestanding -fno-blocks -fno-exceptions -m32 -target $(RUNTIME_TRIPLE_32) -DCOMPILING_HALIDE_RUNTIME -DBITS_32 -emit-llvm -S $(SRC_DIR)/runtime/$*.cpp -o $@ -MMD -MP -MF $(BUILD_DIR)/initmod.$*_32_debug.d
 
 $(BUILD_DIR)/initmod.%_ll.ll: $(SRC_DIR)/runtime/%.ll
 	@-mkdir -p $(BUILD_DIR)
@@ -1091,7 +1100,7 @@ $(BUILD_DIR)/clang_ok:
 	echo '$(CLANG_VERSION)'
 	echo $(findstring version 3,$(CLANG_VERSION))
 	echo $(findstring version 3.0,$(CLANG_VERSION))
-	$(CLANG) --version
+	$(CLANG_DISTHALIDE) --version
 	@exit 1
 endif
 
@@ -1108,7 +1117,7 @@ else
 $(BUILD_DIR)/llvm_ok:
 	@echo "Can't find llvm or version of llvm too old (we need 3.5 or greater):"
 	@echo "You can override this check by setting LLVM_OK=y"
-	$(LLVM_CONFIG) --version
+	$(LLVM_CONFIG_DISTHALIDE) --version
 	@exit 1
 endif
 

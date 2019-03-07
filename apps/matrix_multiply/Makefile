@@ -1,7 +1,7 @@
 include ../support/Makefile.inc
 
 WITH_MPI ?=
-CXX := $(if $(WITH_MPI), mpicxx, $(CXX))
+CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
 MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1, )
 
 # g++ on OS X might actually be system clang without openmp

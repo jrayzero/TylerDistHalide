@@ -1057,6 +1057,52 @@ test_apps: $(BIN_DIR)/libHalide.a $(BIN_DIR)/libHalide.so $(INCLUDE_DIR)/Halide.
 	make -C apps/fft bench_48x48  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
 	cd apps/HelloMatlab; HALIDE_PATH=$(CURDIR) ./run_blur.sh
 
+.PHONY: test_dist_apps
+test_dist_apps: $(BIN_DIR)/libHalide.a $(BIN_DIR)/libHalide.so $(INCLUDE_DIR)/Halide.h $(INCLUDE_DIR)/HalideRuntime.h
+	mkdir -p apps
+	# Make a local copy of the apps if we're building out-of-tree,
+	# because the app Makefiles are written to build in-tree
+	if [ "$(ROOT_DIR)" != "$(CURDIR)" ]; then \
+	  echo "Building out-of-tree, so making local copy of apps"; \
+	  cp -r $(ROOT_DIR)/apps/bilateral_grid \
+		$(ROOT_DIR)/apps/blur \
+		$(ROOT_DIR)/apps/camera_pipe \
+		$(ROOT_DIR)/apps/fluid \
+		$(ROOT_DIR)/apps/heat \
+		$(ROOT_DIR)/apps/interpolate \
+		$(ROOT_DIR)/apps/local_laplacian \
+		$(ROOT_DIR)/apps/resize \
+		$(ROOT_DIR)/apps/sobel \
+		$(ROOT_DIR)/apps/transpose \
+		$(ROOT_DIR)/apps/wavelet \
+                apps; \
+	  mkdir -p tools; \
+	  cp $(ROOT_DIR)/tools/* tools/; \
+        fi
+	make -C apps/bilateral_grid clean HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/bilateral_grid distributed_bilateral_grid WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/blur clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/blur distributed_blur WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/camera_pipe clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/camera_pipe distributed_camera_pipe WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/fluid clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/fluid distributed_fluid WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/heat clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/heat distributed_heat WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/interpolate clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/interpolate distributed_interpolate WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/local_laplacian clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/local_laplacian distributed_local_laplacian WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/resize clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/resize distributed_resize WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/sobel clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/sobel distributed_resize WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/transpose clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/transpose distributed_transpose WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/wavelet clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+	make -C apps/wavelet distributed_distributed WITH_MPI=$(WITH_MPI) HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+
+
 .PHONY: test_python
 test_python: $(BIN_DIR)/libHalide.a
 	mkdir -p python_bindings

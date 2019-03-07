@@ -48,7 +48,126 @@ struct timespec {
 
 #endif
 
-typedef int MPI_Comm;
+  // These are for openmpi
+#ifndef OMPI_DECLSPEC
+#  if defined(WIN32) || defined(_WIN32)
+#    if defined(OMPI_IMPORTS)
+#      define OMPI_DECLSPEC        __declspec(dllimport)
+#    else
+#      define OMPI_DECLSPEC
+#    endif  /* defined(OMPI_IMPORTS) */
+#  else
+#    if OPAL_C_HAVE_VISIBILITY == 1
+#       define OMPI_DECLSPEC __attribute__((visibility("default")))
+#    else
+#       define OMPI_DECLSPEC
+#    endif
+#  endif
+#endif
+#define MPI_INT8_T                OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_int8_t)
+#define MPI_UINT8_T               OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_uint8_t)
+#define MPI_INT16_T               OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_int16_t)
+#define MPI_UINT16_T              OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_uint16_t)
+#define MPI_INT32_T               OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_int32_t)
+#define MPI_UINT32_T              OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_uint32_t)
+#define MPI_INT64_T               OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_int64_t)
+#define MPI_UINT64_T              OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_uint64_t)
+#define MPI_AINT                  OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_aint)
+#define MPI_OFFSET                OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_offset)
+OMPI_DECLSPEC extern struct ompi_predefined_communicator_t ompi_mpi_comm_world;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_datatype_null;
+
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_char;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_signed_char;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_unsigned_char;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_byte;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_short;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_unsigned_short;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_int;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_unsigned;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_long;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_unsigned_long;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_long_long_int;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_unsigned_long_long;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_float;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_double;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_long_double;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_wchar;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_packed;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_int8_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_uint8_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_int16_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_uint16_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_int32_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_uint32_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_int64_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_uint64_t;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_aint;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_offset;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_count;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_c_bool;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_c_float_complex;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_c_double_complex;
+OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_c_long_double_complex;
+
+
+#define OMPI_PREDEFINED_GLOBAL(type, global) ((type) ((void *) &(global)))
+typedef struct ompi_datatype_t *MPI_Datatype;
+typedef struct ompi_communicator_t *MPI_Comm;
+typedef struct ompi_request_t *MPI_Request;
+typedef struct ompi_message_t *MPI_Message;
+typedef struct ompi_status_public_t MPI_Status;
+#define MPI_DATATYPE_NULL OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_datatype_null)
+#define MPI_BYTE OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_byte)
+#define MPI_PACKED OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_packed)
+#define MPI_CHAR OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_char)
+#define MPI_SHORT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_short)
+#define MPI_INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_int)
+#define MPI_LONG OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_long)
+#define MPI_FLOAT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_float)
+#define MPI_DOUBLE OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_double)
+#define MPI_LONG_DOUBLE OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_long_double)
+#define MPI_UNSIGNED_CHAR OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_unsigned_char)
+#define MPI_SIGNED_CHAR OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_signed_char)
+#define MPI_UNSIGNED_SHORT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_unsigned_short)
+#define MPI_UNSIGNED_LONG OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_unsigned_long)
+#define MPI_UNSIGNED OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_unsigned)
+#define MPI_FLOAT_INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_float_int)
+#define MPI_DOUBLE_INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_double_int)
+#define MPI_LONG_DOUBLE_INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_longdbl_int)
+#define MPI_LONG_INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_long_int)
+#define MPI_SHORT_INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_short_int)
+#define MPI_2INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_2int)
+
+#define MPI_WCHAR OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_wchar)
+#if OPAL_HAVE_LONG_LONG
+#define MPI_LONG_LONG_INT OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_long_long_int)
+#define MPI_LONG_LONG OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_long_long_int)
+#define MPI_UNSIGNED_LONG_LONG OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_unsigned_long_long)
+#endif  /* OPAL_HAVE_LONG_LONG */
+#define MPI_2COMPLEX OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_2cplex)
+#define MPI_2DOUBLE_COMPLEX OMPI_PREDEFINED_GLOBAL(MPI_Datatype, ompi_mpi_2dblcplex)
+
+struct ompi_status_public_t {
+    /* These fields are publicly defined in the MPI specification.
+       User applications may freely read from these fields. */
+    int MPI_SOURCE;
+    int MPI_TAG;
+    int MPI_ERROR;
+    /* The following two fields are internal to the Open MPI
+       implementation and should not be accessed by MPI applications.
+       They are subject to change at any time.  These are not the
+       droids you're looking for. */
+    int _cancelled;
+    size_t _ucount;
+};
+typedef struct ompi_status_public_t ompi_status_public_t;
+
+#define MPI_ORDER_C              0                     /* C row major order */
+#define MPI_COMM_WORLD OMPI_PREDEFINED_GLOBAL( MPI_Comm, ompi_mpi_comm_world)
+
+  // these are for mvapich
+  /*typedef int MPI_Comm;
 #define MPI_COMM_WORLD ((MPI_Comm)0x44000000)
 
 typedef int MPI_Request;
@@ -91,7 +210,7 @@ typedef struct MPI_Status {
     int MPI_TAG;
     int MPI_ERROR;
 } MPI_Status;
-
+  */
 #define MPI_SUCCESS          0      /* Successful return code */
 
 extern int MPI_Comm_size(MPI_Comm, int *);

@@ -176,7 +176,9 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 
-    const int w = std::stoi(argv[1]), h = std::stoi(argv[2]), d = 4;
+    const int w = argc > 1 ? std::stoi(argv[1]) : 1000;
+    const int h = argc > 2 ? std::stoi(argv[2]) : 1000;
+    const int d = 4;
     const int ow = w, oh = h, od = 3;
 
     input = DistributedImage<float>(w, h, d);
@@ -215,15 +217,16 @@ int main(int argc, char **argv) {
 #ifdef USE_MPIP
     MPI_Pcontrol(1);
 #endif
-    MPITiming timing(MPI_COMM_WORLD);
-    timing.barrier();
+    std::vector<std::chrono::duration<double,std::milli>> duration_vector_1;
     for (int i = 0; i < niters; i++) {
-        timing.start();
+        MPI_Barrier(MPI_COMM_WORLD);
+        auto start1 = std::chrono::high_resolution_clock::now();
         interpolated_distributed.realize(output.get_buffer());
-        MPITiming::timing_t t = timing.stop();
-        timing.record(t);
+	MPI_Barrier(MPI_COMM_WORLD);
+        auto end1 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double,std::milli> duration1 = end1 - start1;
+        duration_vector_1.push_back(duration1);
     }
-    timing.reduce(MPITiming::Median);
 
     // for (int c = 0; c < output.channels(); c++) {
     //     for (int y = 0; y < output.height(); y++) {
@@ -239,10 +242,10 @@ int main(int argc, char **argv) {
     //     }
     // }
 
-    timing.gather(MPITiming::Max);
-    timing.report();
     if (rank == 0) {
         printf("Interpolate test succeeded!\n");
+	print_time("performance_CPU.csv", "interpolate", {"DistHalde"},
+		 {median(duration_vector_1)});
     }
 
     MPI_Finalize();

@@ -14,7 +14,9 @@ int main(int argc, char **argv) {
     int p = proc_grid[0], q = proc_grid[1], r = proc_grid[2];
     if (rank == 0) printf("Using process grid %dx%dx%d\n", p, q, r);
 
-    const int w = std::stoi(argv[1]), h = std::stoi(argv[2]), d = std::stoi(argv[3]);
+    const int w = argc > 1 ? std::stoi(argv[1]) : 1000;
+    const int h = argc > 2 ? std::stoi(argv[2]) : 1000;
+    const int d = argc > 3 ? std::stoi(argv[3]) : 1000;
     Var x("x"), y("y"), z("z"), xi("xi"), yi("yi");
 
     // Declare our input and output in global width and height.
@@ -61,20 +63,20 @@ int main(int argc, char **argv) {
     heat3d.compile_jit();
     // Run the program and test output for correctness
     const int niters = 50;
-    MPITiming timing(MPI_COMM_WORLD);
-    timing.barrier();
+    std::vector<std::chrono::duration<double,std::milli>> duration_vector_1;
     for (int i = 0; i < niters; i++) {
-        timing.start();
+        MPI_Barrier(MPI_COMM_WORLD);
+        auto start1 = std::chrono::high_resolution_clock::now();
         heat3d.realize(output);
-        MPITiming::timing_t t = timing.stop();
-        timing.record(t);
+        MPI_Barrier(MPI_COMM_WORLD);
+        auto end1 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double,std::milli> duration1 = end1 - start1;
+        duration_vector_1.push_back(duration1);
     }
-    timing.reduce(MPITiming::Median);
-
-    timing.gather(MPITiming::Max);
-    timing.report();
     if (rank == 0) {
         printf("Heat test succeeded!\n");
+	print_time("performance_CPU.csv", "heat", {"DistHalde"},
+		 {median(duration_vector_1)});
     }
     MPI_Finalize();
     return 0;

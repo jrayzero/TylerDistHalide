@@ -3,6 +3,7 @@ include ../support/Makefile.inc
 WITH_MPI ?=
 CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
 MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1, )
+MPI_RUN=$(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp/ -np $(NUM_MPI_RANKS) -host $(MPI_NODES) --map-by node --mca btl_openib_allow_ib 1
 
 BUILD_DIR = build_make
 
@@ -13,6 +14,9 @@ all: $(BUILD_DIR)/wavelet
 
 distributed_wavelet: wavelet_distributed.cpp
 	$(CXX) $(CXXFLAGS) wavelet_distributed.cpp -g $(LIB_HALIDE) -o distributed_wavelet -lpthread -ldl -lz $(LDFLAGS)
+
+run_distributed_wavelet: distributed_wavelet
+	$(MPI_RUN) ./distributed_wavelet
 
 clean:
 	@rm -rf $(BUILD_DIR)

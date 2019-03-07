@@ -61,7 +61,8 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 
-    const int w = std::stoi(argv[1]), h = std::stoi(argv[2]);
+    const int w = argc > 1 ? std::stoi(argv[1]) : 1000;
+    const int h = argc > 2 ? std::stoi(argv[2]) : 1000;
     assert(w == h && "Non-square matrices unimplemented");
 
     // Compute C = A*B

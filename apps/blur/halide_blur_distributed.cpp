@@ -18,7 +18,10 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 #endif
 
-    const int w = std::stoi(argv[1]), h = std::stoi(argv[2]);
+    // give defaults if no inputs
+    const int w = argc > 1 ? std::stoi(argv[1]) : 1000;
+    const int h = argc > 2 ? std::stoi(argv[2]) : 1000;
+
     Func blur_x("blur_x"), blur_y("blur_y");
     Var x("x"), y("y"), xi("xi"), yi("yi");
 
@@ -93,11 +96,12 @@ int main(int argc, char **argv) {
 #else
         blur_y.realize(output);
 #endif
+    MPI_Barrier(MPI_COMM_WORLD);
         auto end1 = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double,std::milli> duration1 = end1 - start1;
         duration_vector_1.push_back(duration1);
     }
-    MPI_Barrier(MPI_COMM_WORLD);
+
 
 #ifdef DISTRIBUTED
     // for (int y = 0; y < output.height(); y++) {
@@ -121,7 +125,7 @@ int main(int argc, char **argv) {
     // }
     if (rank == 0) {
         printf("Blur test succeeded!\n");
-	print_time("performance_CPU.csv", "bilateral_grid", {"DistHalde"},
+	print_time("performance_CPU.csv", "blur", {"DistHalde"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

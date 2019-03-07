@@ -802,9 +802,10 @@ int main(int argc, char **argv) {
     p = proc_grid[0]; q = proc_grid[1]; r = proc_grid[2];
     if (rank == 0) printf("Using process grid %dx%dx%d\n", p, q, r);
 
-    global_w = std::stoi(argv[1]);
-    global_h = std::stoi(argv[2]);
-    global_d = std::stoi(argv[3]);
+    global_w = argc > 1 ? std::stoi(argv[1]) : 100;
+    global_h = argc > 2 ? std::stoi(argv[2]) : 100;
+    global_d = argc > 3 ? std::stoi(argv[3]) : 100;
+    
 
     assert(global_w == global_h && global_h == global_d && "Unimplemented non-cubical.");
     n_cell = global_w;
@@ -860,7 +861,7 @@ int main(int argc, char **argv) {
     // Enable mpiP profiling now. (set MPIP env var to "-o" for this to work)
     // MPI_Pcontrol(1);
 
-    MPITiming timing(MPI_COMM_WORLD);
+    std::vector<std::chrono::duration<double,std::milli>> duration_vector_1;
     const int niters = 1;
     double sec = 0;
     for (int i = 0; i < niters; i++) {
@@ -872,31 +873,24 @@ int main(int argc, char **argv) {
             if (parallel_IOProcessor()) {
                 std::cout << "Advancing time step " << istep << ", time = " << time << "\n";
             }
-
-            timing.start();
+	    MPI_Barrier(MPI_COMM_WORLD);
+	    auto start1 = std::chrono::high_resolution_clock::now();
             advance(U, Q, dt);
-            sec = timing.stop();
-            timing.record(sec);
+	    MPI_Barrier(MPI_COMM_WORLD);
+	    auto end1 = std::chrono::high_resolution_clock::now();
+	    std::chrono::duration<double,std::milli> duration1 = end1 - start1;
+	    duration_vector_1.push_back(duration1);
 
             time = time + dt;
         }
     }
     // double reduced_sec = 0;
     // MPI_Reduce(&sec, &reduced_sec, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-    double local_med = timing.reduce(MPITiming::Median);
-    double local_min = timing.reduce(MPITiming::Min),
-        local_max = timing.reduce(MPITiming::Max);
-    double local_20 = timing.compute_percentile(20);
-    double local_80 = timing.compute_percentile(80);
-    double med = timing.gather(local_med, MPITiming::Max);
-    double min = timing.gather(local_min, MPITiming::Min),
-        max = timing.gather(local_max, MPITiming::Max);
-    double min20 = timing.gather(local_20, MPITiming::Min);
-    double max80 = timing.gather(local_80, MPITiming::Max);
     //timing.report();
     if (rank == 0) {
         std::cout << "Num ranks = " << numprocs << "\n";
-        std::cout << "Median run time (s) = " << std::setprecision(std::numeric_limits<double>::digits10) << (med) << ", min = " << min << ", max = " << max << ", min 20th pctile = " << (min20) << ", max 80th pctile = " << (max80) << "\n";
+	print_time("performance_CPU.csv", "fluid", {"DistHalde"},
+		 {median(duration_vector_1)});
     }
 
     // std::ofstream of("U.distributed.rank" + std::to_string(rank) + ".dat");

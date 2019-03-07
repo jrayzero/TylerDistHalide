@@ -3,6 +3,7 @@ include ../support/Makefile.inc
 WITH_MPI ?=
 CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
 MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1, )
+MPI_RUN=$(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp/ -np $(NUM_MPI_RANKS) -host $(MPI_NODES) --map-by node --mca btl_openib_allow_ib 1
 
 CXXFLAGS += -g -Wall
 
@@ -15,6 +16,9 @@ interpolate: interpolate.cpp
 distributed_interpolate: interpolate_distributed.cpp
 	$(CXX) $(MPI_CXX_FLAGS) $(CXXFLAGS) interpolate_distributed.cpp $(LIB_HALIDE) -o distributed_interpolate -lpthread -ldl -lz \
 	$(PNGFLAGS) $(CUDA_LDFLAGS) $(OPENCL_LDFLAGS) $(OPENGL_LDFLAGS) $(LDFLAGS) $(LLVM_SHARED_LIBS)
+
+run_distributed_interpolate: distributed_interpolate
+	$(MPI_RUN) ./distributed_interpolate
 
 out.png: interpolate
 	./interpolate ../images/rgba.png out.png

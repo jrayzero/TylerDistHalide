@@ -3,6 +3,7 @@ include ../support/Makefile.inc
 WITH_MPI ?=
 CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
 MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1, )
+MPI_RUN=$(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp/ -np $(NUM_MPI_RANKS) -host $(MPI_NODES) --map-by node --mca btl_openib_allow_ib 1
 
 all: test
 
@@ -26,6 +27,9 @@ test: test.cpp halide_blur.o
 
 distributed_blur: halide_blur_distributed.cpp
 	$(CXX) $(CXXFLAGS) $(MPI_CXX_FLAGS) -O3 halide_blur_distributed.cpp $(LIB_HALIDE) -o distributed_blur -ldl -lpthread -lz $(LDFLAGS)
+
+run_distributed_blur: distributed_blur
+	$(MPI_RUN) ./distributed_blur	
 
 nondistributed_blur: ../../ halide_blur_distributed.cpp
 	$(MAKE) -C ../../ $(LIB_HALIDE)

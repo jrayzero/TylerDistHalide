@@ -187,15 +187,16 @@ int main(int argc, char **argv) {
 #ifdef USE_MPIP
     MPI_Pcontrol(1);
 #endif
-    MPITiming timing(MPI_COMM_WORLD);
-    timing.barrier();
+    std::vector<std::chrono::duration<double,std::milli>> duration_vector_1;
     for (int i = 0; i < niters; i++) {
-        timing.start();
+        MPI_Barrier(MPI_COMM_WORLD);
+        auto start1 = std::chrono::high_resolution_clock::now();
         bilateral_grid.realize(output.get_buffer());
-        MPITiming::timing_t t = timing.stop();
-        timing.record(t);
+        auto end1 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double,std::milli> duration1 = end1 - start1;
+        duration_vector_1.push_back(duration1);
     }
-    timing.reduce(MPITiming::Median);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // for (int y = 0; y < output.height(); y++) {
     //     for (int x = 0; x < output.width(); x++) {
@@ -209,10 +210,10 @@ int main(int argc, char **argv) {
     //     }
     // }
 
-    timing.gather(MPITiming::Max);
-    timing.report();
     if (rank == 0) {
         printf("Bilateral grid test succeeded!\n");
+	print_time("performance_CPU.csv", "bilateral_grid", {"DistHalde"},
+		 {median(duration_vector_1)});
     }
     MPI_Finalize();
     return 0;

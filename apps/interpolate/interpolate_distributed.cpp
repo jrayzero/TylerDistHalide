@@ -7,6 +7,7 @@ using namespace Halide;
 #include <iostream>
 #include <limits>
 #include <sys/time.h>
+#include <fstream>
 
 using std::vector;
 
@@ -211,7 +212,22 @@ int main(int argc, char **argv) {
     // JIT compile the pipeline eagerly, so we don't interfere with timing
     Target target = get_target_from_environment();
     interpolated_distributed.compile_jit(target);
+    interpolated_distributed.realize(output.get_buffer());
     // interpolated_correct.realize(global_output);
+
+#ifdef DUMP_RESULTS
+    std::string fname = "rank_" + std::to_string(rank) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + "_d" + std::to_string(d) + ".txt";
+	std::ofstream out_file;
+	out_file.open(fname);
+	for (int i = 0; i < output.height(); i++) {
+	  for (int j = 0; j < output.width(); j++) {
+	    for (int k = 0; k < output.channels(); k++) {
+	      out_file << output(j, i, k) << " "; 
+	    }
+	  }
+	}
+	out_file.close();
+#endif
 
     const int niters = 50;
 #ifdef USE_MPIP

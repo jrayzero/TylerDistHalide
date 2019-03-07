@@ -2,6 +2,8 @@
 #include "mpi_timing.h"
 #include <stdio.h>
 #include <assert.h>
+#include <iostream>
+#include <fstream>
 
 using namespace Halide;
 
@@ -61,8 +63,8 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 
-    const int w = argc > 1 ? std::stoi(argv[1]) : 1000;
-    const int h = argc > 2 ? std::stoi(argv[2]) : 1000;
+    const int w = argc > 1 ? std::stoi(argv[1]) : 1024;
+    const int h = argc > 2 ? std::stoi(argv[2]) : 1024;
     assert(w == h && "Non-square matrices unimplemented");
 
     // Compute C = A*B
@@ -112,20 +114,31 @@ int main(int argc, char **argv) {
     mm_correct.realize(global_C);
     mm_distributed.realize(C.get_buffer());
 
-    const int niters = 10;
-    MPITiming timing(MPI_COMM_WORLD);
-    timing.barrier();
-    timeval t1, t2;
-    for (int i = 0; i < niters; i++) {
-        gettimeofday(&t1, NULL);
-        mm_distributed.realize(C.get_buffer());
-        gettimeofday(&t2, NULL);
-        float t = (t2.tv_sec - t1.tv_sec) + (t2.tv_usec - t1.tv_usec) / 1000000.0f;
-        timing.record(t);
+#ifdef DUMP_RESULTS
+    std::string fname = "rank_" + std::to_string(rank) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + ".txt";
+    std::ofstream out_file;
+    out_file.open(fname);
+    for (int i = 0; i < C.height(); i++) {
+      for (int j = 0; j < C.width(); j++) {
+	out_file << C(j, i) << " "; 
+      }
     }
-    timing.reduce(MPITiming::Median);
+	out_file.close();
+#endif
 
-    for (int y = 0; y < C.height(); y++) {
+    const int niters = 10;
+    std::vector<std::chrono::duration<double,std::milli>> duration_vector_1;
+    for (int i = 0; i < niters; i++) {
+        MPI_Barrier(MPI_COMM_WORLD);
+        auto start1 = std::chrono::high_resolution_clock::now();
+        mm_distributed.realize(C.get_buffer());
+        MPI_Barrier(MPI_COMM_WORLD);
+        auto end1 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double,std::milli> duration1 = end1 - start1;
+        duration_vector_1.push_back(duration1);
+    }
+
+    /*    for (int y = 0; y < C.height(); y++) {
         for (int x = 0; x < C.width(); x++) {
             int gx = C.global(0, x), gy = C.global(1, y);
             if (!float_eq(C(x, y), global_C(gx, gy))) {
@@ -135,13 +148,13 @@ int main(int argc, char **argv) {
                 return -1;
             }
         }
-    }
+	}*/
 
-    timing.gather(MPITiming::Max);
-    timing.report();
 
     if (rank == 0) {
         printf("Matrix multiply test succeeded!\n");
+	print_time("performance_CPU.csv", "mat_mul", {"DistHalde"},
+		 {median(duration_vector_1)});
     }
     MPI_Finalize();
 

@@ -1,5 +1,7 @@
 #include "Halide.h"
 #include "mpi_timing.h"
+#include <iostream>
+#include <fstream>
 using namespace Halide;
 
 int main(int argc, char **argv) {
@@ -14,9 +16,9 @@ int main(int argc, char **argv) {
     int p = proc_grid[0], q = proc_grid[1], r = proc_grid[2];
     if (rank == 0) printf("Using process grid %dx%dx%d\n", p, q, r);
 
-    const int w = argc > 1 ? std::stoi(argv[1]) : 1000;
-    const int h = argc > 2 ? std::stoi(argv[2]) : 1000;
-    const int d = argc > 3 ? std::stoi(argv[3]) : 1000;
+    const int w = argc > 1 ? std::stoi(argv[1]) : 100;
+    const int h = argc > 2 ? std::stoi(argv[2]) : 100;
+    const int d = argc > 3 ? std::stoi(argv[3]) : 10;
     Var x("x"), y("y"), z("z"), xi("xi"), yi("yi");
 
     // Declare our input and output in global width and height.
@@ -61,6 +63,22 @@ int main(int argc, char **argv) {
     }
 
     heat3d.compile_jit();
+
+    heat3d.realize(output);
+#ifdef DUMP_RESULTS
+    std::string fname = "rank_" + std::to_string(rank) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + "_d" + std::to_string(d) + ".txt";
+    std::ofstream out_file;
+    out_file.open(fname);
+    for (int i = 0; i < output.height(); i++) {
+      for (int j = 0; j < output.width(); j++) {
+	for (int k = 0; k < output.channels(); k++) {
+	  out_file << output(j, i, k) << " "; 
+	}
+      }
+    }
+    out_file.close();
+#endif
+    
     // Run the program and test output for correctness
     const int niters = 50;
     std::vector<std::chrono::duration<double,std::milli>> duration_vector_1;

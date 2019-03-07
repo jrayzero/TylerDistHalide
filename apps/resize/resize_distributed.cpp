@@ -192,6 +192,21 @@ int main(int argc, char **argv) {
     }
 
     resize_distributed.compile_jit();
+    resize_distributed.realize(output);
+
+#ifdef DUMP_RESULTS
+    std::string fname = "rank_" + std::to_string(rank) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + "_d" + std::to_string(d) + ".txt";
+	std::ofstream out_file;
+	out_file.open(fname);
+	for (int i = 0; i < output.height(); i++) {
+	  for (int j = 0; j < output.width(); j++) {
+	    for (int k = 0; k < output.channels(); k++) {
+	      out_file << output(j, i, k) << " "; 
+	    }
+	  }
+	}
+	out_file.close();
+#endif
 
     // resize_correct.realize(global_output);
 

@@ -1,5 +1,7 @@
 #include "Halide.h"
 #include "mpi_timing.h"
+#include <iostream>
+#include <fstream>
 #include <stdint.h>
 
 using namespace Halide;
@@ -370,6 +372,19 @@ int main(int argc, char **argv) {
     //processed_correct.realize(global_output);
 
     processed_distributed.realize(output.get_buffer());
+
+#ifdef DUMP_RESULTS
+	std::string fname = "rank_" + std::to_string(rank) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + ".txt";
+	std::ofstream out_file;
+	out_file.open(fname);
+	for (int i = 0; i < output.height(); i++) {
+	  for (int j = 0; j < output.width(); j++) {
+	    out_file << output(j, i) << " "; 
+	  }
+	}
+	out_file.close();
+#endif
+
     const int niters = 50;
 #ifdef USE_MPIP
     MPI_Pcontrol(1);

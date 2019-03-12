@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
     // }
     if (rank == 0) {
         printf("Blur test succeeded!\n");
-	print_time("performance_CPU.csv", "### blur", {"DistHalide"},
+	print_time("performance_CPU.csv", "### blur_" + std::to_string(w) + "_" + std::to_string(h), {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

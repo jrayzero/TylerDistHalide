@@ -309,7 +309,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Local laplacian test succeeded!\n");
-	print_time("performance_CPU.csv", "### local_laplacian", {"DistHalide"},
+	print_time("performance_CPU.csv", "### local_laplacian_" + std::to_string(w) + "_" + std::to_string(h), {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

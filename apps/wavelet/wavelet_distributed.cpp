@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
     daubechies_distributed.realize(output);
     // daubechies_correct.realize(global_output);
 #ifdef DUMP_RESULTS
-    std::string fname = "rank_" + std::to_string(rank) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + "_d" + std::to_string(d) + ".txt";
+    std::string fname = "rank_" + std::to_string(rank) + "_w" + std::to_string(w) + "_h" + std::to_string(h) + ".txt";
 	std::ofstream out_file;
 	out_file.open(fname);
 	for (int i = 0; i < output.height(); i++) {
@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Wavelet test succeeded!\n");
-	print_time("performance_CPU.csv", "### wavelet", {"DistHalide"},
+	print_time("performance_CPU.csv", "### wavelet_" + std::to_string(w) + "_" + std::to_string(h), {"DistHalide"},
 		 {median(duration_vector_1)});
     }
 

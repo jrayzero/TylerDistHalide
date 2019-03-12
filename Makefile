@@ -55,8 +55,6 @@ WITH_MPI ?=
 WITH_RENDERSCRIPT ?= not-empty
 WITH_INTROSPECTION ?= not-empty
 WITH_EXCEPTIONS ?=
-# For distributed, whether results for each rank should be printed
-DUMP_RESULTS ?=
 
 # If HL_TARGET or HL_JIT_TARGET aren't set, use host
 HL_TARGET ?= host
@@ -1107,38 +1105,29 @@ test_dist_apps: $(BIN_DIR)/libHalide.a $(BIN_DIR)/libHalide.so $(INCLUDE_DIR)/Ha
 
 .PHONY: benchmark_dist_apps
 benchmark_dist_apps: $(BIN_DIR)/libHalide.a $(BIN_DIR)/libHalide.so $(INCLUDE_DIR)/Halide.h $(INCLUDE_DIR)/HalideRuntime.h
-	make -C apps/bilateral_grid clean HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/bilateral_grid run_distributed_bilateral_grid WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
 
+#	make -C apps/bilateral_grid clean HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
+#	make -C apps/bilateral_grid run_distributed_bilateral_grid WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) DUMP_RESULTS= W=32768 H=32768
 	make -C apps/blur clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/blur run_distributed_blur WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
-
+	make -C apps/blur run_distributed_blur WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/camera_pipe clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/camera_pipe run_distributed_camera_pipe WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
-
+	make -C apps/camera_pipe run_distributed_camera_pipe WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/heat clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/heat run_distributed_heat WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000 D=10
-
+	make -C apps/heat run_distributed_heat WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536 D=10
 	make -C apps/interpolate clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/interpolate run_distributed_interpolate WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
-
+	make -C apps/interpolate run_distributed_interpolate WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/matrix_multiply clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/matrix_multiply run_distributed_matrix_multiply WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=16384 H=16384
-
+	make -C apps/matrix_multiply run_distributed_matrix_multiply WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/local_laplacian clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/local_laplacian run_distributed_local_laplacian WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
-
+	make -C apps/local_laplacian run_distributed_local_laplacian WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/resize clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/resize run_distributed_resize WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
-
+	make -C apps/resize run_distributed_resize WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/sobel clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) 
-	make -C apps/sobel run_distributed_sobel WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
-
+	make -C apps/sobel run_distributed_sobel WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/transpose clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/transpose run_distributed_transpose WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
-
+	make -C apps/transpose run_distributed_transpose WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 	make -C apps/wavelet clean  HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)
-	make -C apps/wavelet run_distributed_wavelet WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR) W=10000 H=10000
+	make -C apps/wavelet run_distributed_wavelet WITH_MPI=1 HALIDE_BIN_PATH=$(CURDIR) HALIDE_SRC_PATH=$(ROOT_DIR)  W=65536 H=65536
 
 .PHONY: test_python
 test_python: $(BIN_DIR)/libHalide.a

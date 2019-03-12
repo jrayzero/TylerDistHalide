@@ -3,12 +3,10 @@ include ../support/Makefile.inc
 W ?=
 H ?=
 
-BUILD_DIR = build_make
-
 # If HL_TARGET isn't set, use host
 HL_TARGET ?= host
 
-all: $(BUILD_DIR)/wavelet
+all: wavelet
 
 distributed_wavelet: wavelet_distributed.cpp
 	$(CXX) $(CXXFLAGS) wavelet_distributed.cpp -g $(LIB_HALIDE) -o distributed_wavelet -lpthread -ldl -lz $(LDFLAGS)
@@ -17,16 +15,16 @@ run_distributed_wavelet: distributed_wavelet
 	$(MPI_RUN) ./distributed_wavelet $(W) $(H)
 
 clean:
-	@rm -rf $(BUILD_DIR)
+	@rm -rf distributed_wavelet 
 
 # By default, %.generator is produced by building %_generator.cpp
-$(BUILD_DIR)/%.generator: %_generator.cpp $(GENERATOR_DEPS)
+%.generator: %_generator.cpp $(GENERATOR_DEPS)
 	@echo Building Generator $(filter %_generator.cpp,$^)
 	@mkdir -p $(BUILD_DIR)
 	@$(CXX) $(CXXFLAGS) -fno-rtti $(filter-out %.h,$^) -lz -ldl -lpthread -o $@
 
 # By default, %.o/.h are produced by executing %.generator
-$(BUILD_DIR)/%.o $(BUILD_DIR)/%.h: $(BUILD_DIR)/%.generator
+%.o $(BUILD_DIR)/%.h: $(BUILD_DIR)/%.generator
 	@echo Running Generator $<
 	@mkdir -p $(BUILD_DIR)
 	@$< -g $(notdir $*) -o $(BUILD_DIR) target=$(HL_TARGET)

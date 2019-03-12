@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     for (int y = 0; y < input.height(); y++) {
         for (int x = 0; x < input.width(); x++) {
 #ifdef DISTRIBUTED
-            input(x, y) = input.global(0, x) + input.global(1, y);
+	  input(x, y) = (x+y)&0xfff;
 #else
             input(x, y) = x + y;
 #endif
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 #endif
 
     // Run the program and test output for correctness
-    const int niters = 100;
+    const int niters = 50;
 #ifdef USE_MPIP
     MPI_Pcontrol(1);
 #endif
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
     // }
     if (rank == 0) {
         printf("Blur test succeeded!\n");
-	print_time("performance_CPU.csv", "blur", {"DistHalde"},
+	print_time("performance_CPU.csv", "### blur", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

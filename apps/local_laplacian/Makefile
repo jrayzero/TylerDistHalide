@@ -1,9 +1,7 @@
 include ../support/Makefile.inc
 
-WITH_MPI ?=
-CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
-MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1 -DDUMP_RESULTS=$(DUMP_RESULTS), )
-MPI_RUN=$(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp/ -np $(NUM_MPI_RANKS) -host $(MPI_NODES) --map-by node --mca btl_openib_allow_ib 1
+W ?=
+H ?=
 
 all: process
 
@@ -35,7 +33,7 @@ distributed_local_laplacian: ../../ local_laplacian_distributed.cpp
 	$(CXX) $(MPI_CXX_FLAGS) $(CXXFLAGS) -O3 local_laplacian_distributed.cpp -g $(LIB_HALIDE) -o distributed_local_laplacian -lpthread -ldl -lz $(LDFLAGS) $(LLVM_SHARED_LIBS)
 
 run_distributed_local_laplacian: distributed_local_laplacian
-	$(MPI_RUN) ./distributed_local_laplacian
+	$(MPI_RUN) ./distributed_local_laplacian  $(W) $(H)
 
 clean:
 	rm -f process local_laplacian.o process_viz local_laplacian_viz.o local_laplacian_gen local_laplacian.mp4 distributed_local_laplacian

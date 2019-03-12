@@ -89,16 +89,16 @@ int main(int argc, char **argv) {
             float v = rndflt();
             if (A.mine(x, y)) {
                 int lx = A.local(0, x), ly = A.local(1, y);
-                A(lx, ly) = v;
+                A(lx, ly) = 0.1f;
             }
-            global_A(x, y) = v;
+            global_A(x, y) = 0.1f;
 
             v = rndflt();
             if (B.mine(x, y)) {
                 int lx = B.local(0, x), ly = B.local(1, y);
-                B(lx, ly) = v;
+                B(lx, ly) = 0.1f;
             }
-            global_B(x, y) = v;
+            global_B(x, y) = 0.1f;
         }
     }
 
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
 	out_file.close();
 #endif
 
-    const int niters = 10;
+    const int niters = 50;
     std::vector<std::chrono::duration<double,std::milli>> duration_vector_1;
     for (int i = 0; i < niters; i++) {
         MPI_Barrier(MPI_COMM_WORLD);
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Matrix multiply test succeeded!\n");
-	print_time("performance_CPU.csv", "mat_mul", {"DistHalde"},
+	print_time("performance_CPU.csv", "### mat_mul", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

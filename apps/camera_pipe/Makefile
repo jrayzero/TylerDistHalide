@@ -1,9 +1,7 @@
 include ../support/Makefile.inc
 
-WITH_MPI ?=
-CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
-MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1 -DDUMP_RESULTS=$(DUMP_RESULTS), )
-MPI_RUN=$(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp/ -np $(NUM_MPI_RANKS) -host $(MPI_NODES) --map-by node --mca btl_openib_allow_ib 1
+W ?=
+H ?=
 
 ifeq ($(HL_TARGET),ptx)
   SCHEDULE=100
@@ -42,7 +40,7 @@ distributed_camera_pipe: camera_pipe_distributed.cpp
 	$(CXX) $(CXXFLAGS) $(MPI_CXX_FLAGS) -O3 camera_pipe_distributed.cpp $(LIB_HALIDE) -o distributed_camera_pipe -ldl -lpthread -lz $(LDFLAGS)
 
 run_distributed_camera_pipe: distributed_camera_pipe
-	$(MPI_RUN) ./distributed_camera_pipe
+	$(MPI_RUN) ./distributed_camera_pipe $(W) $(H)
 
 clean:
 	rm -f out.png process curved.o camera_pipe fcam/*.o distributed_camera_pipe

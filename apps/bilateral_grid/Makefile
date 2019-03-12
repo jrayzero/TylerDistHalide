@@ -1,9 +1,7 @@
 include ../support/Makefile.inc
 
-WITH_MPI ?=
-CXX := $(if $(WITH_MPI), $(MPI_BUILD_DIR)/bin/mpic++, $(CXX))
-MPI_CXX_FLAGS=$(if $(WITH_MPI), -DWITH_MPI=1 -DDUMP_RESULTS=$(DUMP_RESULTS), )
-MPI_RUN=$(MPI_BUILD_DIR)/bin/mpirun -x LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):/tmp/ -np $(NUM_MPI_RANKS) -host $(MPI_NODES) --map-by node --mca btl_openib_allow_ib 1
+W ?=
+H ?=
 
 all: filter
 
@@ -27,7 +25,7 @@ distributed_bilateral_grid: bilateral_grid_distributed.cpp
 	$(CXX) $(CXXFLAGS) $(MPI_CXX_FLAGS) -O3 bilateral_grid_distributed.cpp $(LIB_HALIDE) -o distributed_bilateral_grid -ldl -lpthread -lz $(LDFLAGS)
 
 run_distributed_bilateral_grid: distributed_bilateral_grid
-	$(MPI_RUN) ./distributed_bilateral_grid	
+	$(MPI_RUN) ./distributed_bilateral_grid	$(W) $(H)
 
 clean:
 	rm -f bilateral_grid bilateral_grid.mp4 bilateral_grid.o bilateral_grid.h bilateral filter distributed_bilateral_grid

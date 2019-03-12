@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Resize test succeeded!\n");
-	print_time("performance_CPU.csv", "resize", {"DistHalde"},
+	print_time("performance_CPU.csv", "### resize", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
 

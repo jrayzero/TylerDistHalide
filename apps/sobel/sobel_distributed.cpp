@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 
     for (int y = 0; y < input.height(); y++) {
         for (int x = 0; x < input.width(); x++) {
-            input(x, y) = input.global(0, x) + input.global(1, y);
+	  input(x, y) = (x+y);
         }
     }
 
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Sobel test succeeded!\n");
-	print_time("performance_CPU.csv", "sobel", {"DistHalde"},
+	print_time("performance_CPU.csv", "### sobel", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
 

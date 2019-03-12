@@ -255,8 +255,7 @@ int main(int argc, char **argv) {
         for (int y = 0; y < input.height(); y++) {
             for (int x = 0; x < input.width(); x++) {
                 int gx = input.global(0, x), gy = input.global(1, y), gz = input.global(2, z);
-                uint16_t v = rand() & 0xfff;
-                input(x, y, z) = v;
+                input(x, y, z) = (x+y+z) & 0xfff;
             }
         }
     }
@@ -310,7 +309,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Local laplacian test succeeded!\n");
-	print_time("performance_CPU.csv", "local_laplacian", {"DistHalde"},
+	print_time("performance_CPU.csv", "### local_laplacian", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Transpose test succeeded!\n");
-	print_time("performance_CPU.csv", "transpose", {"DistHalde"},
+	print_time("performance_CPU.csv", "### transpose", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

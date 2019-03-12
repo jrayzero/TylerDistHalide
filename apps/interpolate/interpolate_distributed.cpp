@@ -260,7 +260,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Interpolate test succeeded!\n");
-	print_time("performance_CPU.csv", "interpolate", {"DistHalde"},
+	print_time("performance_CPU.csv", "### interpolate", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
 

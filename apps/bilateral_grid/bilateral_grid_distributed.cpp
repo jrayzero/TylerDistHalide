@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Bilateral grid test succeeded!\n");
-	print_time("performance_CPU.csv", "bilateral_grid", {"DistHalde"},
+	print_time("performance_CPU.csv", "### bilateral_grid", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

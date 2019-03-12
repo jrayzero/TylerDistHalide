@@ -416,7 +416,7 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Camera pipe test succeeded!\n");
-	print_time("performance_CPU.csv", "camera_pipe", {"DistHalde"},
+	print_time("performance_CPU.csv", "### camera_pipe", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
 

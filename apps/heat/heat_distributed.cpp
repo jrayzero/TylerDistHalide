@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     for (int z = 0; z < input.channels(); z++) {
         for (int y = 0; y < input.height(); y++) {
             for (int x = 0; x < input.width(); x++) {
-                input(x, y, z) = input.global(0, x) + input.global(1, y) + input.global(2, z);
+	      input(x, y, z) = (x+y+z);
             }
         }
     }
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
     }
     if (rank == 0) {
         printf("Heat test succeeded!\n");
-	print_time("performance_CPU.csv", "heat", {"DistHalde"},
+	print_time("performance_CPU.csv", "### heat", {"DistHalide"},
 		 {median(duration_vector_1)});
     }
     MPI_Finalize();

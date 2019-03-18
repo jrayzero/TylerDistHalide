@@ -35,7 +35,8 @@ double median(vector<std::chrono::duration<double, std::milli>> scores)
 
 string str_identation(int size)
 {
-    assert(size >= 0);
+  //    assert(size >= 0);
+  if (size < 0) size = 1;
     std::ostringstream ss;
     for (size_t i = 0; i < size; ++i) {
         ss << " ";

@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 
     for (int y = 0; y < input.height(); y++) {
         for (int x = 0; x < input.width(); x++) {
-	  input(x, y) = (x+y);
+	  input(x, y) = (rank+x+y);
         }
     }
 

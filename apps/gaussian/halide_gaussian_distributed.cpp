@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
   //            .fuse(x_outer, y_outer, tile_index)
   //            .compute_root();
   //            .parallel(x_outer);
-  //  gaussian_x.distribute(y);
+  gaussian.parallel(c);
   gaussian.distribute(y);
   output.set_domain(x,y,c);
   output.placement().distribute(y);
